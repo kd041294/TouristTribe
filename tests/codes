@@ -1,0 +1,164 @@
+public function add(Request $req) {
+        $day = $req -> number_of_day;
+        $hotel = $req -> hotels;
+        $midtrip = $req -> midtrip;
+
+        //create hotel string
+        $countHotel = count($hotel);
+        $hotelString = '';
+        $check = 1;
+        for($i = 0; $i < $countHotel; $i++){
+            $hotelId =  $hotel[$i];
+            if($hotelId != '000'){
+                //Hotel Use Update
+                $hotelData = Hotel::find($hotelId);
+                $hotelUse = $hotelData['use'];
+                $hotelUse = $hotelUse + 1;
+                $hotelData['use'] = (int)$hotelUse;
+                $hotelData -> save();
+                
+                if($check == $countHotel){
+                    $hotelString .= $hotelId;
+                }
+                else{
+                    $hotelString .= $hotelId.",";
+                }
+            }
+            else{
+                if($check == $countHotel){
+                    $hotelString .= '000';
+                }
+                else{
+                    $hotelString .= '000,';
+                }
+            }
+            $check = $check + 1;
+        }
+
+        //create midtrip string
+        $countMidtrip = count($midtrip);
+        $midtripString = '';
+        $check = 1;
+        for($i = 0; $i < $countMidtrip; $i++){
+            $midtripId = $midtrip[$i];
+
+            //Midtrip Use Update
+            $midtripDatas = Midtrip::find($midtripId);
+            $midtripUse = (int)$midtripDatas['use'];
+            $midtripUse = $midtripUse + 1;
+            $midtripDatas['use'] = (int)$midtripUse;
+            $midtripDatas -> save();
+            if($check == $countMidtrip){
+                $midtripString .= $midtrip[$i];
+            }
+            else{
+                $midtripString .= $midtrip[$i].",";
+            }
+            $check = $check + 1; 
+        }
+
+        $allGender = $req -> all_gender;
+        $onlyMens = $req -> only_men;
+        $onlyWomens = $req -> only_women;
+
+        
+
+        $Religions_all = $req -> Religions_all;
+        $Religions_buddhism = $req -> Religions_buddhism;
+        $Religions_hindu = $req -> Religions_hindu;
+        $Religions_sikhism = $req -> Religions_sikhism;
+        $Religions_islam = $req -> Religions_islam;
+        $Religions_christian = $req -> Religions_christian;
+
+        //meal Use Update
+        $mealId = $req -> meal;
+        $mealData = Meal::find($mealId);
+        $mealUse = $mealData['use'];
+        $mealUse = $mealUse + 1;
+        $mealData['use'] = (int)$mealUse;
+        $mealData -> save();
+
+        //Location Use Update
+        $locationId = $req -> location_id;
+        $locationData = Location::find($locationId);
+        $locationUse = $locationData['use'];
+        $locationUse = $locationUse + 1;
+        $locationData['use'] = (int)$locationUse;
+        $locationData -> save();
+
+        //Transfer Use Update
+        $transferId = $req -> transfer;
+        $transferData = Transfer::find($transferId);
+        $transferUse = $transferData['use'];
+        $transferUse = $transferUse + 1; 
+        $transferData['use'] = (int)$transferUse;
+        $transferData -> save();
+
+        $data = new Trip;
+
+        $data -> tour_operator_id = session('tour_operator_data')['id'];
+        $data -> location_id = $req -> location_id;
+        $data -> location_name = $req -> location_name;
+        $data -> trip_name = $req -> trip_name;
+        $data -> no_of_days = $day;
+        $data -> no_of_nights = $day -1; 
+        $data -> hotels = $hotelString;
+        $data -> midtrips = $midtripString;
+
+        $data -> meal = $mealId;
+        $data -> transfers= $transferId;
+        
+        /*Cast Start*/
+        if($allGender){
+            $data -> allGender = '1';    
+        }
+
+        if($onlyMens){
+            $data -> onlyMens = '1';
+        }
+    
+        if($onlyWomens){
+            $data -> onlyWomens = '1';
+        }
+        /*Cast Stop*/
+
+        /* Religion Start*/
+        if($Religions_all){
+            $data -> allCast = '1';    
+        }
+
+        if($Religions_buddhism){
+            $data -> buddhismCast = '1';    
+        }
+
+        if($Religions_hindu){
+            $data -> hinduCast = '1';    
+        }
+
+        if($Religions_sikhism){
+            $data -> sikhismCast = '1';    
+        }
+       
+        if($Religions_islam){
+            $data -> islamCast = '1';    
+        }
+        
+        if($Religions_christian){
+            $data -> christianCast = '1';    
+        }
+        /* Religion Stop*/
+
+        $data -> pickup_details = $req -> pickup;
+        $data -> drop_details = $req -> drop;
+        $data -> other_details = $req -> detail;
+
+        $data -> save();        
+
+        if($data){
+            return redirect()->route('seller_trip')->with('message','Trip added Successfully');
+        }
+        else{
+            return redirect()->route('seller_trip')->with('message','Trip Not added');
+        }
+        
+    }
